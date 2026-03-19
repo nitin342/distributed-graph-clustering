@@ -35,32 +35,101 @@ source venv/bin/activate
 pip install -r ../requirements.txt
 ```
 
-## Quick start
+## Usage
 
 ```bash
 # Built-in 12-node toy graph (3 communities)
 python main.py
 
-# Run on a SNAP edge list
-python main.py --input ../data/com-lj.ungraph.txt --verbose
+# Run on an edge list file
+python main.py --input ../data/graph.txt
 
-# One level only (no contraction)
-python main.py --input ../data/com-lj.ungraph.txt --no-contraction
+# Save clustering to file
+python main.py --input ../data/graph.txt --output ../results/clustering.txt
+
+# One-level only (no contraction)
+python main.py --no-contraction
+
+# Verbose output (per-round progress)
+python main.py --verbose
 ```
 
-See `src/README.md` for full usage and implementation details.
+### Options
+
+| Flag | Default | Description |
+|---|---|---|
+| `--input` | (toy graph) | Edge list file (tab/space separated, `#` for comments) |
+| `--output` | (none) | Write clustering to file (node TAB cluster) |
+| `--subrounds` | 4 | Sub-rounds per round |
+| `--max-rounds` | 8 | Max rounds per local-moving phase |
+| `--seed` | 42 | Hash seed for sub-round assignment |
+| `--no-contraction` | off | Skip contraction (one-level DSLM-Mod w/o Cont.) |
+| `--verbose` | off | Print per-round progress |
+
+## Input Format
+
+Plain edge list, one edge per line:
+
+```
+# comment lines are skipped
+0  1
+0  2
+1  2
+```
+
+Parallel edges are summed. Self-loops are ignored.
+
+## How It Works
+
+### The Files and What They Do
+
+**`graph.py` -- Loading and Basic Math**
+Reads an edge list file and turns it into a Python dictionary. Also computes the degree of each node and the total volume (sum of all degrees = twice the total edge weight).
+
+**`quality.py` -- Measuring How Good a Clustering Is**
+Contains two things:
+- `modularity()` -- given a clustering, scores it. Higher is better. It rewards clusters that have many internal edges and few external ones.
+- `delta_modularity()` -- answers "if I move this one node to a different cluster, how much does the score change?" This is the core math used to decide whether to move a node.
+
+**`dslm.py` -- The Heart of the Algorithm**
+Three parts:
+1. `node_subround()` -- uses a hash function to assign each node a sub-round number (0-3). Deterministic: given the same node, round, and seed, you always get the same sub-round.
+2. `compute_bids()` -- for a given node, looks at all its neighbors and figures out which clusters are nearby and how strongly connected the node is to each one.
+3. `local_moving()` -- the main loop. Runs up to 8 rounds, each with 4 sub-rounds. In each sub-round: active nodes compute bids simultaneously from a snapshot, independently pick their best cluster, then all moves commit at once.
+
+**`contract.py` -- Shrinking the Graph Between Levels**
+After local moving converges, every cluster becomes a single super-node. Edges between clusters become edges between super-nodes; edges within a cluster become a self-loop on the super-node (this preserves the cluster's volume so the algorithm does not get confused at the next level). Runs local moving again on the smaller graph, repeats until nothing changes, then unpacks super-node assignments back to the original nodes.
+
+**`main.py` -- Putting It All Together**
+Command-line program with a built-in 12-node toy graph (3 communities of 4 nodes each, 3 bridge edges). Pass your own edge list with `--input`.
+
+### How a Full Run Looks (Toy Graph)
+
+```
+Level 0: 12 nodes
+  sub-round 0: some nodes move to their neighbours' clusters
+  sub-round 1: more nodes consolidate
+  round 2: nothing changes, stop
+  → 3 clusters: {0,1,2,3}, {4,5,6,7}, {8,9,10,11}
+
+Level 1: contract to 3 super-nodes
+  round 1: nothing changes (already optimal)
+  → done
+
+Final: 3 clusters, Q = 0.524
+```
+
+### One Important Design Detail
+
+When contracting the graph, intra-cluster edges must be kept as self-loops on the super-node. Without them, a super-node's degree only reflects its bridge edges, so the algorithm thinks the super-nodes are barely connected to anything and merges them all into one cluster (Q = 0). With self-loops, the super-node's degree correctly equals the total volume of the original cluster.
 
 ## Files
 
-```
-src/
-  graph.py      graph loading, degree computation
-  quality.py    modularity score and delta-modularity
-  dslm.py       bidding step, compare step, local moving loop
-  contract.py   graph contraction and multi-level runner
-  main.py       CLI entry point
-
-paper_summary.md          summary of the paper
-project_plan.md           project phases and report outline
-requirements.txt          Python dependencies
-```
+| File | Description |
+|---|---|
+| `src/graph.py` | Graph loading, degree computation, utilities |
+| `src/quality.py` | Modularity score and delta-modularity |
+| `src/dslm.py` | Bidding step, compare step, local moving loop |
+| `src/contract.py` | Graph contraction and multi-level runner |
+| `src/main.py` | CLI entry point and toy graph definition |
+| `requirements.txt` | Python dependencies |

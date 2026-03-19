@@ -12,3 +12,8 @@ report/
 # agent/tooling files
 CLAUDE.md
 .claude/
+
+# project planning/notes (not for submission)
+paper_summary.md
+project_plan.md
+rubric.md
