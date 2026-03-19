@@ -54,15 +54,15 @@ def modularity(graph, clustering, degrees, total_vol):
     return q
 
 
-def delta_modularity(w_v_candidate, vol_candidate,
-                     w_v_current, vol_current_minus_v,
-                     deg_v, total_vol):
+def delta_modularity(
+    w_v_candidate, vol_candidate, w_v_current, vol_current_minus_v, deg_v, total_vol
+):
     """Delta-Q for moving v from its current cluster A to candidate cluster C.
 
     gain_add    = benefit of joining C
     gain_remove = savings from leaving A (negative cost)
     """
     M = total_vol
-    gain_add    =  2 * w_v_candidate / M - 2 * deg_v * vol_candidate    / (M * M)
-    gain_remove = -(2 * w_v_current  / M - 2 * deg_v * vol_current_minus_v / (M * M))
+    gain_add = 2 * w_v_candidate / M - 2 * deg_v * vol_candidate / (M * M)
+    gain_remove = -(2 * w_v_current / M - 2 * deg_v * vol_current_minus_v / (M * M))
     return gain_add + gain_remove

@@ -26,7 +26,7 @@ def _ts():
 def node_subround(node_id, round_num, seed, n_subrounds):
     """Hash a node to a sub-round index. Fast integer mixing, no crypto needed."""
     h = node_id ^ (round_num * 2246822519) ^ (seed * 2654435761)
-    h = ((h >> 16) ^ h) * 0x45d9f3b
+    h = ((h >> 16) ^ h) * 0x45D9F3B
     h = ((h >> 16) ^ h) & 0xFFFFFFFF
     return h % n_subrounds
 
@@ -85,8 +85,16 @@ def best_move(v, bids, current_cluster, deg_v, total_vol):
     return best_cluster
 
 
-def local_moving(graph, clustering, degrees, total_vol,
-                 n_subrounds=4, max_rounds=8, seed=42, verbose=False):
+def local_moving(
+    graph,
+    clustering,
+    degrees,
+    total_vol,
+    n_subrounds=4,
+    max_rounds=8,
+    seed=42,
+    verbose=False,
+):
     """Run one DSLM-Mod local-moving phase. Modifies clustering in place.
 
     Returns (clustering, rounds_done, any_change).
@@ -137,8 +145,11 @@ def local_moving(graph, clustering, degrees, total_vol,
 
             if verbose:
                 n_clusters = len(set(clustering.values()))
-                print(f"  [{_ts()}] round {round_num + 1} | sub-round {sub} "
-                      f"| moves: {moves_made} | clusters: {n_clusters}", flush=True)
+                print(
+                    f"  [{_ts()}] round {round_num + 1} | sub-round {sub} "
+                    f"| moves: {moves_made} | clusters: {n_clusters}",
+                    flush=True,
+                )
 
         if verbose:
             status = "changes" if round_changed else "converged"

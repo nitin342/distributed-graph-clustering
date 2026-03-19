@@ -59,8 +59,9 @@ def unpack_clustering(super_clustering, super_to_nodes):
     return result
 
 
-def run_multilevel(graph, degrees, total_vol,
-                   n_subrounds=4, max_rounds=8, seed=42, verbose=False):
+def run_multilevel(
+    graph, degrees, total_vol, n_subrounds=4, max_rounds=8, seed=42, verbose=False
+):
     """Run DSLM-Mod with multi-level contraction. Returns original-node clustering."""
     current_graph = graph
     current_degrees = degrees
@@ -74,12 +75,17 @@ def run_multilevel(graph, degrees, total_vol,
     while True:
         if verbose:
             n_clusters_before = len(set(current_clustering.values()))
-            print(f"[{_ts()}] Level {level}: {len(current_graph)} nodes, "
-                  f"{n_clusters_before} initial clusters", flush=True)
+            print(
+                f"[{_ts()}] Level {level}: {len(current_graph)} nodes, "
+                f"{n_clusters_before} initial clusters",
+                flush=True,
+            )
 
         current_clustering, rounds, any_change = local_moving(
-            current_graph, current_clustering,
-            current_degrees, current_vol,
+            current_graph,
+            current_clustering,
+            current_degrees,
+            current_vol,
             n_subrounds=n_subrounds,
             max_rounds=max_rounds,
             seed=seed,
@@ -92,7 +98,9 @@ def run_multilevel(graph, degrees, total_vol,
             stored_maps.append(super_to_nodes)
             break
 
-        super_graph, _, super_to_nodes = contract_graph(current_graph, current_clustering)
+        super_graph, _, super_to_nodes = contract_graph(
+            current_graph, current_clustering
+        )
         stored_maps.append(super_to_nodes)
 
         if len(super_graph) >= len(current_graph):
