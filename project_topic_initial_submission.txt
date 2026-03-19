@@ -1,0 +1,7 @@
+CSC 502 Project Description
+
+Student: Nitin Gupta, V00921217
+
+Paper: https://arxiv.org/abs/1710.09605
+
+This project is based on "Distributed Graph Clustering using Modularity and Map Equation" by Hamann, Strasser, Wagner, and Zeitz (Euro-Par 2018). The paper addresses the problem of finding communities in very large graphs, such as social networks, where nodes that are more connected to each other than to the rest of the graph should be grouped together. When a graph is too large to fit on a single machine, standard algorithms break down, and the paper proposes a distributed solution called DSLM that runs across many machines using a MapReduce-style framework. The key idea is to let many nodes update their cluster assignments at the same time by splitting each round into sub-rounds using a hash function, which avoids the sequential bottleneck of existing methods. The project will explain the problem and the algorithm, walk through a small example to build intuition, and also include an implementation and experiments on real datasets.

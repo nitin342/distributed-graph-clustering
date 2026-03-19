@@ -1,0 +1,14 @@
+data/
+results/
+src/venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+# report is tracked separately via Overleaf
+report/
+
+# agent/tooling files
+CLAUDE.md
+.claude/
