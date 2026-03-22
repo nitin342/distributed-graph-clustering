@@ -1,0 +1,36 @@
+flowchart TD
+
+    INIT["Initialize\nEach node starts in its own cluster\ncluster[v] = v  for all v"]
+
+    subgraph LM["Local Moving Phase  (up to 8 rounds)"]
+        direction TB
+
+        HASH["Assign all nodes to r = 4 sub-rounds\nnode_subround(v, round, seed) mod r\nDeterministic -- no coordination needed"]
+
+        subgraph SR["For each sub-round  0 ... r-1"]
+            direction LR
+            SNAP["Snapshot\ncluster_vol frozen\nbefore any moves"]
+            BID["Bidding Step\nFor each active node v:\nscan neighbors\nbids[C] = (vol(C), w(v,C))"]
+            CMP["Compare Step\nFor each candidate C:\ndelta-Q(v->C) = gain(join C) - cost(leave A)\nC* = argmax if delta-Q > 0"]
+            SNAP --> BID --> CMP
+        end
+
+        APPLY["Apply all moves simultaneously\nAll active nodes commit at once\nusing the pre-sub-round snapshot"]
+
+        CHKR{"Any node moved\nthis round?"}
+
+        HASH --> SR --> APPLY --> CHKR
+        CHKR -- "Yes, next round" --> HASH
+    end
+
+    INIT --> LM
+
+    style INIT  fill:#dbeafe,stroke:#3b82f6,color:#1c1917
+    style LM    fill:#f0fdf4,stroke:#86efac,color:#1c1917
+    style HASH  fill:#eff6ff,stroke:#93c5fd,color:#1c1917
+    style SR    fill:#fefce8,stroke:#fde047,color:#1c1917
+    style SNAP  fill:#fef9c3,stroke:#eab308,color:#1c1917
+    style BID   fill:#fef9c3,stroke:#eab308,color:#1c1917
+    style CMP   fill:#fef9c3,stroke:#eab308,color:#1c1917
+    style APPLY fill:#eff6ff,stroke:#93c5fd,color:#1c1917
+    style CHKR  fill:#f3e8ff,stroke:#a855f7,color:#1c1917

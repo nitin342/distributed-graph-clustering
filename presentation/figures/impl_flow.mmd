@@ -1,0 +1,34 @@
+flowchart TD
+
+    IN["Edge List\ncom-LiveJournal\n4M nodes, 34.7M edges"]
+
+    GP["graph.py\nLoad edge list, remap IDs\ncompute deg(v), vol(C)"]
+    QP["quality.py\nModularity Q\ndelta-Q for a proposed move"]
+
+    subgraph DSLM["dslm.py  --  Local Moving Phase"]
+        direction LR
+        HASH["Sub-round hash\nh(node, round, seed) mod 4"]
+        BID["Bidding step\nscan neighbors, emit bids"]
+        CMP["Compare step\npick best cluster by delta-Q"]
+        HASH --> BID --> CMP
+    end
+
+    CP["contract.py\nCollapse clusters into super-nodes\nMulti-level runner, unpack at end"]
+
+    OUT["Output Clustering\nQ = 0.753  |  1548 communities"]
+
+    IN --> GP --> DSLM
+    QP --> DSLM
+    DSLM --> CP
+    CP -- "recurse on contracted graph" --> DSLM
+    CP --> OUT
+
+    style IN    fill:#dbeafe,stroke:#3b82f6,color:#1c1917
+    style GP    fill:#fef9c3,stroke:#eab308,color:#1c1917
+    style QP    fill:#fef9c3,stroke:#eab308,color:#1c1917
+    style DSLM  fill:#eff6ff,stroke:#93c5fd,color:#1c1917
+    style HASH  fill:#e0f2fe,stroke:#38bdf8,color:#1c1917
+    style BID   fill:#e0f2fe,stroke:#38bdf8,color:#1c1917
+    style CMP   fill:#e0f2fe,stroke:#38bdf8,color:#1c1917
+    style CP    fill:#fff7ed,stroke:#fb923c,color:#1c1917
+    style OUT   fill:#dcfce7,stroke:#16a34a,color:#14532d

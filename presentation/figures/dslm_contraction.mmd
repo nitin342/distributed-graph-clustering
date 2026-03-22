@@ -1,0 +1,21 @@
+flowchart TD
+
+    CONV["Local Moving Converged\nNo node moved this round"]
+
+    CONT["Contraction\nMerge cluster C into super-node s_C\nIntra-cluster edges become self-loop on s_C\ndeg(s_C) = vol(C)  -- volume is preserved"]
+
+    CHKC{"Contracted graph\nsmaller than before?"}
+
+    RECURSE["Recurse\nRun local moving on\ncontracted super-graph"]
+
+    UNPACK["Unpack Levels\nWalk back through stored mappings\nrecover original-node cluster labels"]
+
+    CONV --> CONT --> CHKC
+    CHKC -- "Yes" --> RECURSE --> CONT
+    CHKC -- "No -- done" --> UNPACK
+
+    style CONV    fill:#dbeafe,stroke:#3b82f6,color:#1c1917
+    style CONT    fill:#fff7ed,stroke:#fb923c,color:#1c1917
+    style CHKC    fill:#f3e8ff,stroke:#a855f7,color:#1c1917
+    style RECURSE fill:#eff6ff,stroke:#93c5fd,color:#1c1917
+    style UNPACK  fill:#dcfce7,stroke:#16a34a,color:#14532d
